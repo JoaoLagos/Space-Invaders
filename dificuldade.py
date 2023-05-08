@@ -3,12 +3,7 @@ from PPlay.window import *
 from PPlay.sprite import *
 from PPlay.mouse import *
 
-def start():
-    #JANELA
-    janela_width = 1000
-    janela_height = 800
-    janela = Window(janela_width, janela_height)
-
+def start(janela, reloadMouse):
     mouse = Window.get_mouse()
 
     # SPRITES
@@ -38,26 +33,29 @@ def start():
     while True:
 
         # FÁCIL
-        if mouse.is_over_object(facil) and mouse.is_button_pressed(1):
+        if mouse.is_over_object(facil) and mouse.is_button_pressed(1) and reloadMouse<=0:
             #nivel = 1
             janela.clear()
             #return 1
             break
 
         #MÉDIO
-        if mouse.is_over_object(medio) and mouse.is_button_pressed(1): 
+        if mouse.is_over_object(medio) and mouse.is_button_pressed(1) and reloadMouse<=0: 
             #nivel = 2
             janela.clear()
             #return 2
             break
            
         # DIFÍCIL
-        if mouse.is_over_object(dificil) and mouse.is_button_pressed(1):
+        if mouse.is_over_object(dificil) and mouse.is_button_pressed(1) and reloadMouse<=0:
             #nivel = 3
             janela.clear()
             #return 3
             break
         
+        if reloadMouse > 0:
+            reloadMouse -= 0.02
+
         janela.set_background_color(((246, 255, 238)))
         dificuldade.draw()
         facil.draw()

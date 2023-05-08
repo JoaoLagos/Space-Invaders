@@ -28,11 +28,8 @@ def savePoints(pontos):
     arquivoRanking.close()
 
 ''' Inicializar essa Janela '''
-def start():
+def start(janela, reloadMouse):
     #JANELA
-    janela_width = 1000
-    janela_height = 800
-    janela = Window(janela_width, janela_height)
     background = GameImage("assets/sprites/menu/bg2.jpg")
     background.draw()
 
@@ -70,5 +67,7 @@ def start():
                 janela.draw_text(f"{posicao+1}. LUGAR: {rank_ID[0]} - {rank_ID[1]} pontos", x=listRank.x + 80, y=200 + posicao*60, bold=True, size=18)
                 posicao += 1
         
-        
+        if reloadMouse > 0:
+            reloadMouse -= 0.02
+
         janela.update()

@@ -17,6 +17,7 @@ bg = GameImage("assets/sprites/menu/bg2.jpg")
 
 # ENTRADA
 mouse = Window.get_mouse()
+reloadMouse = 5
 
 janela.set_title("Space Invaders")
 
@@ -49,17 +50,24 @@ botao_sair.y = 600
 while True:
     bg.draw()  
 
-    if mouse.is_over_object(botao_iniciar) and mouse.is_button_pressed(1):
-        jogo.start()
+    if mouse.is_over_object(botao_iniciar) and mouse.is_button_pressed(1) and reloadMouse<=0:
+        reloadMouse = 5
+        jogo.start(janela, reloadMouse)
 
-    if mouse.is_over_object(botao_dificuldade) and mouse.is_button_pressed(1):
-        dificuldade.start()
+    if mouse.is_over_object(botao_dificuldade) and mouse.is_button_pressed(1) and reloadMouse<=0:
+        reloadMouse = 5
+        dificuldade.start(janela, reloadMouse)
         
-    if mouse.is_over_object(botao_ranking) and mouse.is_button_pressed(1):
-        ranking.start()    
+        
+    if mouse.is_over_object(botao_ranking) and mouse.is_button_pressed(1) and reloadMouse<=0:
+        reloadMouse = 5
+        ranking.start(janela, reloadMouse)    
 
-    if mouse.is_over_object(botao_sair) and mouse.is_button_pressed(1):
+    if mouse.is_over_object(botao_sair) and mouse.is_button_pressed(1) and reloadMouse<=0:
         janela.close()
+
+    if reloadMouse > 0:
+        reloadMouse -= 0.02
 
     logo.draw()
     botao_iniciar.draw() 

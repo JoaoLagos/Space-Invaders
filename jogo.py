@@ -29,11 +29,7 @@ def efeito_piscante(sprite, cowdownInv):
         sprite.unhide()
 
 ''' Inicializa essa janela '''
-def start():
-    # JANELA
-    janela_width = 1000
-    janela_height = 800
-    janela = Window(janela_width, janela_height)
+def start(janela, reloadMouse):
     # Background
     bg = GameImage("assets/sprites/jogo/bg2.jpg")
 
@@ -96,7 +92,7 @@ def start():
                 if posFuturaX <= 0:
                     velx_inimigo = abs(velx_inimigo)
                     movimentoDescida = 1
-                if posFuturaX >= janela_width-inimigo.width:
+                if posFuturaX >= janela.width-inimigo.width:
                     velx_inimigo = -velx_inimigo
                     movimentoDescida = 1
                 ## Movimento Descida EIXO Y
@@ -212,6 +208,9 @@ def start():
 
 
         decaimentoPontos += janela.delta_time() # Incrementa no decaimentoPontos com o passar do tempo
+
+        if reloadMouse > 0:
+            reloadMouse -= 0.02
         
         # Próxima Fase
         if len(Linimigos)==0:
