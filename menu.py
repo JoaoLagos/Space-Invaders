@@ -7,7 +7,6 @@ import dificuldade
 import jogo
 import ranking
 
-
 # JANELA
 janela_width = 1000
 janela_height = 800

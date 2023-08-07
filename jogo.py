@@ -28,6 +28,20 @@ def efeito_piscante(sprite, cowdownInv):
     else: 
         sprite.unhide()
 
+''' Para implementação dda inserção do nickname '''
+def draw_text(surface, text, pos, font_size, color):
+    font = pygame.font.Font(None, font_size)
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect(center=pos)  # Centraliza o texto
+    surface.blit(text_surface, pos)
+
+''' Função para obter o tamanho do texto sem renderizá-lo na tela '''
+def get_text_size(text, size):
+    BLACK = (0, 0, 0)
+    font = pygame.font.Font(None, size)
+    text_surface = font.render(text, True, BLACK)
+    return text_surface.get_width(), text_surface.get_height()
+
 ''' Inicializa essa janela '''
 def start(janela, reloadMouse):
     # Background
@@ -225,8 +239,93 @@ def start(janela, reloadMouse):
             break
         if len(Lvida)==0 or gameOver==1:
             janela.clear()
-            ranking.savePoints(pontos)
-            break
+            bg = GameImage("assets/sprites/jogo/bg_nickname.jpg")
+
+            logo = Sprite("assets/sprites/menu/logo.png")
+            logo.x = janela.width/2 - logo.width/2
+            logo.y = 35
+
+            WHITE = (255, 255, 255)
+            BLACK = (0, 0, 0)
+
+            running = True
+            avisoTamanho = False
+            avisoEspaco = False
+
+            color_index = 0
+            colors = [(255, 255, 0), (255, 0, 0)]
+            color_change_interval = 500  # Tempo em milissegundos (500ms = 0.5 segundos)
+            last_color_change_time = pygame.time.get_ticks()
+            # Tamanho da caixa de entrada
+            input_box_width = 200
+            input_box_height = 36
+            # Posição centralizada horizontalmente e verticalmente para a caixa de entrada
+            input_box_x = (janela.width - input_box_width) // 2
+            input_box_y = (janela.height - input_box_height) // 2
+            nickname_text = "Nickname:"
+            nickname_width, nickname_height = get_text_size(nickname_text, 36)
+            nickname_x = janela.width // 2 - nickname_width//2
+            nickname_y = input_box_y - 30
+            input_text = ""
+            clock = pygame.time.Clock()
+
+            while running:
+                bg.draw()
+                for event in pygame.event.get(): #pygame.key.get_pressed()[pygame.K_F11]
+                    if event.type == pygame.QUIT:
+                        running = False
+                    elif event.type == pygame.KEYDOWN:
+                        if pygame.key.get_pressed()[pygame.K_RETURN]:
+                            nickname = input_text
+                            print("Nickname inserido:", nickname)
+                            if not len(nickname)==0:
+                                running = False
+                            else:
+                                avisoTamanho = True
+                                avisoEspaco = False
+
+                        elif event.key == pygame.K_BACKSPACE:
+                            input_text = input_text[:-1]
+                        else:
+                            new_char = event.unicode
+                            if new_char != " ":
+                                new_text = input_text + new_char
+                                text_width, text_height = get_text_size(new_text, 28)
+                                if text_width <= input_box_width - 20:
+                                    input_text = new_text
+                            elif new_char == " ": #else
+                                avisoEspaco = True
+                                avisoTamanho = False
+
+
+
+                input_box = pygame.Rect(input_box_x, input_box_y+30, input_box_width, input_box_height)
+                pygame.draw.rect(janela.screen, (255, 255, 0), input_box, 4)
+
+                # Textos
+                draw_text(janela.screen, nickname_text, (nickname_x, input_box_y - 30+30), 36, (255, 255, 0))
+                draw_text(janela.screen, input_text, (input_box_x + 10, input_box_y + 10+30), 28, (255, 0, 0))
+
+                # Verifica se é hora de alternar a cor
+                current_time = pygame.time.get_ticks()
+                if current_time - last_color_change_time >= color_change_interval:
+                    last_color_change_time = current_time
+                    color_index = (color_index + 1) % len(colors)
+                if avisoTamanho:
+                    draw_text(janela.screen,"AVISO: Insira um nome.",(input_box_x,input_box_y + input_box_height + 40), 20, colors[color_index])
+                elif avisoEspaco:
+                    draw_text(janela.screen,"AVISO: Não é permitido espaço.",(input_box_x,input_box_y + input_box_height + 40), 20, colors[color_index])
+
+                logo.draw()
+
+                pygame.display.flip()
+                clock.tick(60)
+
+            
+
+
+            ranking.savePoints(nickname, pontos)
+            return 0
 
         nave.draw()
         vida.draw()

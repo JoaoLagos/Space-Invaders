@@ -4,8 +4,7 @@ from PPlay.sprite import *
 import operator
 
 ''' Salva o NOME e a PONTUAÇÃO do jogador no RANKING, já organizando em ORDEM DECRESCENTE dos pontos '''
-def savePoints(pontos):
-    name = input("Digite o nome do jogador: ")
+def savePoints(name, pontos):
 
     ### Abre o arquivo em modo LEITURA, para pegar os dados das linhas.
     arquivoRanking = open("arquivos/ranking.txt", "r")
