@@ -54,7 +54,8 @@ def start(janela, reloadMouse):
             break
 
         for rank_ID in lista:
-            if posicao < 5:
+            print(rank_ID)
+            if posicao < 5 and posicao < len(lista):
                 ### Desenha medalhas
                 medalha = Sprite(medalhas[posicao])
                 medalha.x = listRank.x + 30
