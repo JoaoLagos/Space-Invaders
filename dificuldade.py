@@ -2,9 +2,12 @@ import pygame
 from PPlay.window import *
 from PPlay.sprite import *
 from PPlay.mouse import *
+from PPlay.gameimage import *
 
 def start(janela, reloadMouse):
     mouse = Window.get_mouse()
+
+    bg = GameImage("assets/sprites/menu/bg2.jpg")
 
     # SPRITES
     ## Dificuldade
@@ -31,6 +34,7 @@ def start(janela, reloadMouse):
     dificil.y = 500
     dificil.draw()
     while True:
+        bg.draw()
 
         # FÁCIL
         if mouse.is_over_object(facil) and mouse.is_button_pressed(1) and reloadMouse<=0:
@@ -56,7 +60,8 @@ def start(janela, reloadMouse):
         if reloadMouse > 0:
             reloadMouse -= 0.02
 
-        janela.set_background_color(((246, 255, 238)))
+        janela.draw_text(f"AINDA FALTA SER IMPLEMENTADO!!!", x=350, y=200, bold=True, size=18, color=(255,0,0))
+
         dificuldade.draw()
         facil.draw()
         medio.draw()
