@@ -277,7 +277,7 @@ def start(janela, reloadMouse):
                     elif event.type == pygame.KEYDOWN:
                         if pygame.key.get_pressed()[pygame.K_RETURN]:
                             nickname = input_text
-                            print("Nickname inserido:", nickname)
+                            #print("Nickname inserido:", nickname)
                             if not len(nickname)==0:
                                 running = False
                             else:
