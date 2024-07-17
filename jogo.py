@@ -45,12 +45,13 @@ def get_text_size(text, size):
 
 ''' Inicializa essa janela '''
 def start(janela, reloadMouse):
+    teclado = Window.get_keyboard()
     # Background
     bg = GameImage("assets/sprites/jogo/bg2.jpg")
 
     # SPRITES
     ## Nave (Player)
-    nave = Player(janela)
+    nave = Player(janela, teclado)
     nave.draw()
 
     ## Vidas
@@ -59,10 +60,7 @@ def start(janela, reloadMouse):
     vida.x = 5
     vida.y = 10
 
-    teclado = Window.get_keyboard()
-
     # Listas
-    Lbullets_Player = []
     Lbullets_Inimigo = []
     Linimigos = []
     Linimigos = cria_inimigos()
@@ -86,10 +84,7 @@ def start(janela, reloadMouse):
         bg.draw()
         # NAVE
         # Movimento Nave
-        if teclado.key_pressed("A") and nave.x >= 0:
-            nave.x -= nave.velx*janela.delta_time()
-        if teclado.key_pressed("D") and nave.x <= janela.width-nave.width:
-                nave.x += nave.velx*janela.delta_time()
+        nave.process_moviment()
 
         # INIMIGOS
         for linha in Linimigos:
@@ -122,26 +117,23 @@ def start(janela, reloadMouse):
         # BULLET
         ## Bullet Protagonista
         ### Bullet saindo da Nave
-        if teclado.key_pressed("SPACE") and nave.rBullet <= 0:
-            nave.rBullet = 10
-            bullet = Sprite("assets/sprites/jogo/bullet.png", 1)
-            bullet.x = nave.x + nave.width/2 - 3
-            bullet.y = nave.y
-            Lbullets_Player.append(bullet)
+        nave.process_bullet()
 
         ### Movimento Bullet
-        vely_bulletAliado = 200 + 200*(level-1)/2
-        for bullet in Lbullets_Player:
-            bullet.y -= vely_bulletAliado*janela.delta_time()
+        
+        #vely_bulletAliado = 200 + 200*(level-1)/2
+        for bullet in nave.Lbullets:
+            bullet.vely += 200*(level-1)/2
+            bullet.y -= bullet.vely*janela.delta_time()
 
             #### Colisão Inimigo e Bullet
             if len(Linimigos)>0 and (bullet.y <= Linimigos[-1][-1].y+Linimigos[-1][-1].height) and (bullet.y >= Linimigos[0][0].y):
                 for linha in Linimigos:
                     for inimigo in linha:
                         if bullet.collided(inimigo):
-                            Lbullets_Player.remove(bullet) 
+                            nave.Lbullets.remove(bullet) 
                             linha.remove(inimigo)
-                            nave.pontos += int((100/decaimentoPontos)//1) #Incrementa pontos
+                            nave.process_points(decaimentoPontos)
                             decaimentoPontos = 1 #Reseta o fator decaimentoPontos
                             
                             if len(linha)==0:
@@ -156,7 +148,7 @@ def start(janela, reloadMouse):
 
             #### Remove caso passe da tela
             elif bullet.y <= 0 - bullet.height:
-                Lbullets_Player.remove(bullet)
+                nave.Lbullets.remove(bullet)
             bullet.draw()
 
         ### Recarga do Bullet
@@ -225,7 +217,7 @@ def start(janela, reloadMouse):
         
         # Próxima Fase
         if len(Linimigos)==0:
-            Lbullets_Player = []
+            nave.Lbullets = []
             Lbullets_Inimigo = []
             Linimigos = cria_inimigos()
             if level<=2:
