@@ -5,21 +5,21 @@ from PPlay.sprite import *
 from PPlay.mouse import *
 from PPlay.keyboard import *
 import random
-from modules.player import Player
+from modules.enemy import *
+from modules.player import *
 import ranking
 
 ''' Cria a matriz de inimigos '''
-def cria_inimigos():
+def cria_inimigos(window):
     Lista_inimigos = []
     for linha in range(5):
         lista_linha = []
         for coluna in range(6):
-            inimigos = Sprite("assets/sprites/jogo/inimigo.png", 1)
-            inimigos.x = (3*inimigos.width/2)*coluna + 1
-            inimigos.y = (3*inimigos.height/2)*linha
-            lista_linha.append(inimigos)
+            inimigo = Enemy(window)
+            inimigo.x = (3*inimigo.width/2)*coluna + 1
+            inimigo.y = (3*inimigo.height/2)*linha
+            lista_linha.append(inimigo)
         Lista_inimigos.append(lista_linha)
-
     return Lista_inimigos
 
 ''' Faz o efeito piscante no Sprite '''
@@ -61,17 +61,14 @@ def start(janela, reloadMouse):
     vida.y = 10
 
     # Listas
-    Lbullets_Inimigo = []
-    Linimigos = []
-    Linimigos = cria_inimigos()
+    #Linimigos = []
+    Linimigos = cria_inimigos(janela)
 
     # Contadores
-    rBullet_Inimigo = 0
+    
     # Variáveis
     level = 1
-    velx_inimigo = 200 
-    vely_inimigo = 100
-    movimentoDescida = 0
+    movimentoDescida = False
     tempo = 0
     fps = 0
     frames = 0
@@ -91,21 +88,15 @@ def start(janela, reloadMouse):
             for inimigo in linha:
                 # Movimento Inimigo
                 ## Movimento Horizontal EIXO X
-                inimigo.x += velx_inimigo*janela.delta_time() * (1 + (level-1)/2)
-                posFuturaX = inimigo.x + velx_inimigo*janela.delta_time() * (1 + (level-1)/2)
-                posFuturaY = inimigo.y + vely_inimigo*janela.delta_time()
-                if posFuturaX <= 0:
-                    velx_inimigo = abs(velx_inimigo)
-                    movimentoDescida = 1
-                if posFuturaX >= janela.width-inimigo.width:
-                    velx_inimigo = -velx_inimigo
-                    movimentoDescida = 1
+                inimigo.move_horizontal()
+                movimentoDescida = inimigo.check_down()
                 ## Movimento Descida EIXO Y
-                if movimentoDescida == 1:
+                if movimentoDescida:
                     for linha in Linimigos:
                         for inimigo in linha:
-                            inimigo.y += 40
-                    movimentoDescida = 0
+                            inimigo.move_vertical()
+                    movimentoDescida = False
+
                 # GameOver caso inimigos atinjam a altura da nave
                 if inimigo.y+inimigo.height >= nave.y:
                     janela.clear()
@@ -157,27 +148,27 @@ def start(janela, reloadMouse):
 
         ## Bullet Inimigo
         ### Bullet saindo dos inimigos
-        if rBullet_Inimigo<=0:
+        if Enemy.rBullet<=0:
             if len(Linimigos)>0: # Pois para sair o tiro do inimigo, precisa ter pelo menos um inimigo vivo para que ele possa atirar
                 bullet = Sprite("assets/sprites/jogo/bullet.png", 1) # Tiro saindo de inimigo aleatório
                 linhaInimigo = random.randint(0, len(Linimigos)-1)
                 posInimigo = random.randint(0, len(Linimigos[linhaInimigo])-1)
                 bullet.x = Linimigos[linhaInimigo][posInimigo].x + Linimigos[linhaInimigo][posInimigo].width/2
                 bullet.y = Linimigos[linhaInimigo][posInimigo].y + Linimigos[linhaInimigo][posInimigo].height/2
-                Lbullets_Inimigo.append(bullet)
+                Enemy.LBullets.append(bullet)
 
-                rBullet_Inimigo = random.randint(0, 16)/level # Recarregamento Bullet Inimigo (Aleatório)
+                Enemy.rBullet = random.randint(0, 16)/level # Recarregamento Bullet Inimigo (Aleatório)
         ### Movimento Bullet Inimigo
-        for bullet in Lbullets_Inimigo:
+        for bullet in Enemy.LBullets:
             vely_bulletInimigo = 200*level
             bullet.y += vely_bulletInimigo*janela.delta_time()
             #### Remove caso passe da tela
             if bullet.y > janela.height:
-                Lbullets_Inimigo.remove(bullet)
+                Enemy.LBullets.remove(bullet)
             #### Colisão Bullet com Player
             if invensivel <= 0: # Para validar a colisão, caso não tenha sido atingido recentemente
                 if bullet.collided(nave):
-                    Lbullets_Inimigo.remove(bullet)
+                    Enemy.LBullets.remove(bullet)
                     nave.vida-=1
                     #Lvida.remove(Lvida[-1])
                     nave.x = janela.width/2 - nave.width/2
@@ -194,8 +185,8 @@ def start(janela, reloadMouse):
             efeito_piscante(nave, invensivel)
         
         ### Recarga Bullet Inimigo
-        if rBullet_Inimigo>0:
-            rBullet_Inimigo -= 10 * janela.delta_time()
+        if Enemy.rBullet>0:
+            Enemy.rBullet -= 10 * janela.delta_time()
 
         # FPS
         tempo += janela.delta_time()
@@ -218,8 +209,8 @@ def start(janela, reloadMouse):
         # Próxima Fase
         if len(Linimigos)==0:
             nave.Lbullets = []
-            Lbullets_Inimigo = []
-            Linimigos = cria_inimigos()
+            Enemy.LBullets = []
+            Linimigos = cria_inimigos(janela)
             if level<=2:
                 level += 0.4
         
