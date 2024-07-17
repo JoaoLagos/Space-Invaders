@@ -5,6 +5,7 @@ from PPlay.sprite import *
 from PPlay.mouse import *
 from PPlay.keyboard import *
 import random
+from modules.player import Player
 import ranking
 
 ''' Cria a matriz de inimigos '''
@@ -48,15 +49,13 @@ def start(janela, reloadMouse):
     bg = GameImage("assets/sprites/jogo/bg2.jpg")
 
     # SPRITES
-    ## Nave
-    nave = Sprite("assets/sprites/jogo/nave.png", 1)
-    nave.x = janela.width/2 - nave.width/2
-    nave.y = janela.height - nave.height - 10
+    ## Nave (Player)
+    nave = Player(janela)
     nave.draw()
 
     ## Vidas
     Lvida = ["assets/sprites/jogo/vida1.png", "assets/sprites/jogo/vida2.png", "assets/sprites/jogo/vida3.png"]
-    vida = Sprite(Lvida[-1], 1)
+    vida = Sprite(Lvida[nave.vida-1], 1)
     vida.x = 5
     vida.y = 10
 
@@ -69,7 +68,6 @@ def start(janela, reloadMouse):
     Linimigos = cria_inimigos()
 
     # Contadores
-    rBullet_Player = 0
     rBullet_Inimigo = 0
     # Variáveis
     level = 1
@@ -79,7 +77,6 @@ def start(janela, reloadMouse):
     tempo = 0
     fps = 0
     frames = 0
-    pontos = 0
     decaimentoPontos = 0 #Fator de divisão que aumenta com o passar do tempo, e reseta ao atingir um inimigo
     invensivel = 0
     gameOver = 0
@@ -89,11 +86,10 @@ def start(janela, reloadMouse):
         bg.draw()
         # NAVE
         # Movimento Nave
-        velx_nave = 300
         if teclado.key_pressed("A") and nave.x >= 0:
-            nave.x -= velx_nave*janela.delta_time()
+            nave.x -= nave.velx*janela.delta_time()
         if teclado.key_pressed("D") and nave.x <= janela.width-nave.width:
-                nave.x += velx_nave*janela.delta_time()
+                nave.x += nave.velx*janela.delta_time()
 
         # INIMIGOS
         for linha in Linimigos:
@@ -126,8 +122,8 @@ def start(janela, reloadMouse):
         # BULLET
         ## Bullet Protagonista
         ### Bullet saindo da Nave
-        if teclado.key_pressed("SPACE") and rBullet_Player <= 0:
-            rBullet_Player = 10
+        if teclado.key_pressed("SPACE") and nave.rBullet <= 0:
+            nave.rBullet = 10
             bullet = Sprite("assets/sprites/jogo/bullet.png", 1)
             bullet.x = nave.x + nave.width/2 - 3
             bullet.y = nave.y
@@ -145,7 +141,7 @@ def start(janela, reloadMouse):
                         if bullet.collided(inimigo):
                             Lbullets_Player.remove(bullet) 
                             linha.remove(inimigo)
-                            pontos += int((100/decaimentoPontos)//1) #Incrementa pontos
+                            nave.pontos += int((100/decaimentoPontos)//1) #Incrementa pontos
                             decaimentoPontos = 1 #Reseta o fator decaimentoPontos
                             
                             if len(linha)==0:
@@ -164,8 +160,8 @@ def start(janela, reloadMouse):
             bullet.draw()
 
         ### Recarga do Bullet
-        if rBullet_Player > 0:
-            rBullet_Player -= 10*(1 + (level-1)/2) * janela.delta_time()
+        if nave.rBullet > 0:
+            nave.rBullet -= 10*(1 + (level-1)/2) * janela.delta_time()
 
         ## Bullet Inimigo
         ### Bullet saindo dos inimigos
@@ -190,12 +186,13 @@ def start(janela, reloadMouse):
             if invensivel <= 0: # Para validar a colisão, caso não tenha sido atingido recentemente
                 if bullet.collided(nave):
                     Lbullets_Inimigo.remove(bullet)
-                    Lvida.remove(Lvida[-1])
+                    nave.vida-=1
+                    #Lvida.remove(Lvida[-1])
                     nave.x = janela.width/2 - nave.width/2
                     nave.y = janela.height - nave.height - 10
                     invensivel = 40 # Deixar invensível por um tempo, contagem mais abaixo
-                    if len(Lvida)!=0:
-                        vida = Sprite(Lvida[-1], 1)
+                    if nave.vida!=0:
+                        vida = Sprite(Lvida[nave.vida-1], 1)
                         vida.x = 5
                         vida.y = 10
             bullet.draw()
@@ -217,7 +214,7 @@ def start(janela, reloadMouse):
             tempo = 0
         janela.draw_text(f"FPS: {fps}", x=janela.width-100,
                         y=0, color=(123, 20, 10), bold=True, size=16)
-        janela.draw_text(f"Pontos: {pontos}", x=10,
+        janela.draw_text(f"Pontos: {nave.pontos}", x=10,
                         y=vida.y + vida.height + 10, color=(255, 255, 255), bold=True, size=16)
 
 
@@ -237,7 +234,7 @@ def start(janela, reloadMouse):
         # VOLTAR AO MENU 
         if teclado.key_pressed("ESC"):
             break
-        if len(Lvida)==0 or gameOver==1:
+        if nave.vida==0 or gameOver==1:
             janela.clear()
             bg = GameImage("assets/sprites/jogo/bg_nickname.jpg")
 
@@ -324,7 +321,7 @@ def start(janela, reloadMouse):
             
 
 
-            ranking.savePoints(nickname, pontos)
+            ranking.savePoints(nickname, nave.pontos)
             return 0
 
         nave.draw()
